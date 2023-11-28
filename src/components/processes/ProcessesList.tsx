@@ -1,8 +1,9 @@
-import { IProcess } from "./ProcessesView";
+import { IProcess } from "../StaticAllocationView";
 
 interface IProcessesListProps {
   processes: IProcess[];
   onProcessRemoved: (id: number) => void;
+  isSimulationRunning: boolean;
 }
 
 export default function ProcessesList(props: IProcessesListProps) {
@@ -40,7 +41,7 @@ export default function ProcessesList(props: IProcessesListProps) {
             }}
           >
             <div>{process.size}kb</div>
-            <div>
+            {!props.isSimulationRunning && (
               <button
                 onClick={() => props.onProcessRemoved(process.id)}
                 style={{
@@ -55,7 +56,7 @@ export default function ProcessesList(props: IProcessesListProps) {
               >
                 Remove
               </button>
-            </div>
+            )}
           </div>
         ))
       )}

@@ -1,8 +1,9 @@
-import { IPartition } from "./PartitionsView";
+import { IPartition } from "../StaticAllocationView";
 
 interface IPartitionsListProps {
   partitions: IPartition[];
   onPartitionRemoved: (id: number) => void;
+  isSimulationRunning: boolean;
 }
 
 export default function PartitionsList(props: IPartitionsListProps) {
@@ -42,7 +43,7 @@ export default function PartitionsList(props: IPartitionsListProps) {
             <div>{partition.used}kb</div>
             <div>/</div>
             <div>{partition.size}kb</div>
-            <div>
+            {!props.isSimulationRunning && (
               <button
                 onClick={() => props.onPartitionRemoved(partition.id)}
                 style={{
@@ -57,7 +58,7 @@ export default function PartitionsList(props: IPartitionsListProps) {
               >
                 Remove
               </button>
-            </div>
+            )}
           </div>
         ))
       )}
