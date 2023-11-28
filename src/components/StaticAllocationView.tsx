@@ -14,6 +14,7 @@ export interface IProcess {
   id: number;
   size: number;
   allocatedIn: IPartition | null;
+  isLocked?: boolean;
 }
 
 export interface ISimulationData {
@@ -26,6 +27,7 @@ export default function StaticAllocationView() {
   const [partitions, setPartitions] = useState<IPartition[]>([]);
   const [processes, setProcesses] = useState<IProcess[]>([]);
   const [simulations, setSimulations] = useState<ISimulationData[]>([]);
+  const [strategy, setStrategy] = useState<string>("first-fit");
 
   const [isSimulationRunning, setIsSimulationRunning] = useState(false);
   const hasPartitionsAndProcesses =
@@ -71,7 +73,11 @@ export default function StaticAllocationView() {
 
       // Clear the "allocatedIn" for processes
       setProcesses((prevProcesses) =>
-        prevProcesses.map((process) => ({ ...process, allocatedIn: null }))
+        prevProcesses.map((process) => ({
+          ...process,
+          allocatedIn: null,
+          isLocked: false,
+        }))
       );
     } else {
       // If the simulation is not running, start it
@@ -113,15 +119,37 @@ export default function StaticAllocationView() {
     // is assigned to the first available partition that can accommodate its size
 
     const processesToAllocate = processes.filter(
-      (process) => process.allocatedIn === null
+      (process) => process.allocatedIn === null && !process.isLocked
     );
+
+    if (processesToAllocate.length === 0) {
+      setSimulations((prevSimulations) => [
+        ...prevSimulations,
+        {
+          id: prevSimulations.length + 1,
+          date: new Date(),
+          text: "No other processes can be allocated.",
+        },
+      ]);
+      console.log("No processes to allocate");
+      return;
+    }
 
     for (const process of processesToAllocate) {
       console.log("Allocating process", process.id);
 
-      const availablePartition = partitions.find(
-        (partition) => !partition.used && partition.size >= process.size
-      );
+      let availablePartition: IPartition | undefined;
+      if (strategy === "first-fit") {
+        availablePartition = partitions.find(
+          (partition) => !partition.used && partition.size >= process.size
+        );
+      } else {
+        availablePartition = partitions
+          .filter(
+            (partition) => !partition.used && partition.size >= process.size
+          )
+          .sort((a, b) => a.size - b.size)[0];
+      }
 
       if (availablePartition) {
         console.log(
@@ -163,6 +191,8 @@ export default function StaticAllocationView() {
             }kb). Fragmentation is ${getPartitionFragmentationsInKbytes()}kb, representing ${getPartitionFragmentationsInPercentage()}% of total space.`,
           },
         ]);
+        process.isLocked = true;
+
         console.log("No available partitions for process", process.id);
       }
     }
@@ -175,7 +205,7 @@ export default function StaticAllocationView() {
         allocateProcesses();
         // Update state to trigger re-render with new allocations
         setProcesses([...processes]);
-      }, 1000); // Adjust the interval as needed
+      }, 2000); // Adjust the interval as needed
 
       // Return a cleanup function to stop the simulation when the component unmounts
       return () => clearInterval(intervalId);
@@ -226,26 +256,54 @@ export default function StaticAllocationView() {
           />
         </div>
       </div>
-      <button
+      <div
         style={{
-          backgroundColor: hasPartitionsAndProcesses
-            ? isSimulationRunning
-              ? "#e74c3c"
-              : "#2ecc71"
-            : "#7f8c8d",
-          color: "white",
-          padding: "15px",
-          borderRadius: "8px",
-          cursor: "pointer",
-          outline: "none",
-          border: "none",
-          width: "200px",
+          display: "flex",
+          flexDirection: "column",
+          gap: 8,
         }}
-        disabled={!hasPartitionsAndProcesses}
-        onClick={toggleSimulation}
       >
-        {isSimulationRunning ? "Stop Simulation" : "Start Simulation"}
-      </button>
+        <button
+          style={{
+            backgroundColor: hasPartitionsAndProcesses
+              ? isSimulationRunning
+                ? "#e74c3c"
+                : "#2ecc71"
+              : "#7f8c8d",
+            color: "white",
+            padding: "15px",
+            borderRadius: "8px",
+            cursor: "pointer",
+            outline: "none",
+            border: "none",
+            width: "200px",
+          }}
+          disabled={!hasPartitionsAndProcesses}
+          onClick={toggleSimulation}
+        >
+          {isSimulationRunning ? "Stop Simulation" : "Start Simulation"}
+        </button>
+        <div style={{ display: "flex" }}>
+          <div
+            style={{
+              color: strategy === "first-fit" ? "blue" : "black",
+              cursor: "pointer",
+            }}
+            onClick={() => setStrategy("first-fit")}
+          >
+            [ first-fit ]
+          </div>
+          <div
+            style={{
+              color: strategy === "best-fit" ? "blue" : "black",
+              cursor: "pointer",
+            }}
+            onClick={() => setStrategy("best-fit")}
+          >
+            [ best-fit ]
+          </div>
+        </div>
+      </div>
       {!hasPartitionsAndProcesses && (
         <div>Add partitions and processes to start the simulation</div>
       )}
@@ -259,7 +317,15 @@ export default function StaticAllocationView() {
             width: "100%",
           }}
         >
-          <div style={{ fontWeight: "bold" }}>Simulation Log</div>
+          <div style={{ fontWeight: "bold" }}>
+            Simulation Log{" "}
+            <span
+              style={{ color: "red", marginLeft: 9, cursor: "pointer" }}
+              onClick={() => setSimulations([])}
+            >
+              clear
+            </span>
+          </div>
           {simulations.map((simulation) => (
             <div
               key={simulation.id}
