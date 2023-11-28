@@ -5,15 +5,25 @@ import ProgramsList from "./programs/ProgramsList";
 import TotalMemoryController from "./TotalMemoryController";
 import TotalMemoryList from "./TotalMemoryList";
 
+export interface IDynamicAllocationData {
+  totalSize: number;
+  allocatedPrograms: IProgram[];
+}
+
 export default function DynamicAllocationView() {
   const [programs, setPrograms] = useState<IProgram[]>([]);
   const [initialPrograms, setInitialPrograms] = useState<IProgram[]>([]);
-  const [totalSize, setTotalSize] = useState<number>(0);
+  const [dynamicAllocationData, setDynamicAllocationData] =
+    useState<IDynamicAllocationData>({
+      totalSize: 0,
+      allocatedPrograms: [],
+    });
   const [isSimulationRunning, setIsSimulationRunning] =
     useState<boolean>(false);
   const [doGenerateLogs, setDoGenerateLogs] = useState<boolean>(false);
   const [simulations, setSimulations] = useState<ISimulationData[]>([]);
-  const hasProgramsAndTotalSize = programs.length > 0 && totalSize > 0;
+  const hasProgramsAndTotalSize =
+    programs.length > 0 && dynamicAllocationData.totalSize > 0;
   const [strategy, setStrategy] = useState<"first-fit" | "best-fit">(
     "first-fit"
   );
@@ -78,7 +88,7 @@ export default function DynamicAllocationView() {
     const simulationLog = simulations.reduce((acc, simulation) => {
       return `${acc}${simulation.date.toUTCString()} - ${simulation.text}\n`;
     }, "");
-    const simulationData = `Allocation method: Dynamic Partitioned Allocation\nStrategy: ${strategy}\n\nTotal size: ${totalSize}\nPrograms:\n${programsData}\nSimulation Log:\n${simulationLog}`;
+    const simulationData = `Allocation method: Dynamic Partitioned Allocation\nStrategy: ${strategy}\n\nTotal size: ${dynamicAllocationData}\nPrograms:\n${programsData}\nSimulation Log:\n${simulationLog}`;
 
     const element = document.createElement("a");
     const file = new Blob([simulationData], {
@@ -108,20 +118,34 @@ export default function DynamicAllocationView() {
         }}
       >
         <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
-          <TotalMemoryController
-            onSetTotalSize={setTotalSize}
-            onClearTotalSize={() => setTotalSize(0)}
-          />
+          {!isSimulationRunning && (
+            <TotalMemoryController
+              onSetTotalSize={(newSize) =>
+                setDynamicAllocationData({
+                  ...dynamicAllocationData,
+                  totalSize: newSize,
+                })
+              }
+              onClearTotalSize={() =>
+                setDynamicAllocationData({
+                  ...dynamicAllocationData,
+                  totalSize: 0,
+                })
+              }
+            />
+          )}
           <TotalMemoryList
-            totalSize={totalSize}
+            dynamicAllocationData={dynamicAllocationData}
             isSimulationRunning={isSimulationRunning}
           />
         </div>
         <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
-          <ProgramsController
-            onAddProgram={addProgram}
-            onClearPrograms={() => setPrograms([])}
-          />
+          {!isSimulationRunning && (
+            <ProgramsController
+              onAddProgram={addProgram}
+              onClearPrograms={() => setPrograms([])}
+            />
+          )}
           <ProgramsList
             programs={programs}
             onProgramRemoved={removeProgram}

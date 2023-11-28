@@ -1,5 +1,7 @@
+import { IDynamicAllocationData } from "./DynamicAllocationView";
+
 interface ITotalMemoryListProps {
-  totalSize: number;
+  dynamicAllocationData: IDynamicAllocationData;
   isSimulationRunning: boolean;
 }
 
@@ -16,7 +18,7 @@ export default function TotalMemoryList(props: ITotalMemoryListProps) {
         overflow: "hidden",
       }}
     >
-      {props.totalSize === 0 ? (
+      {props.dynamicAllocationData.totalSize === 0 ? (
         <div
           style={{
             padding: "20px",
@@ -35,7 +37,9 @@ export default function TotalMemoryList(props: ITotalMemoryListProps) {
           }}
         >
           {!props.isSimulationRunning
-            ? "Total Memory Size: " + props.totalSize + "kb"
+            ? "Total Memory Size: " +
+              props.dynamicAllocationData.totalSize +
+              "kb"
             : ""}
         </div>
       )}
