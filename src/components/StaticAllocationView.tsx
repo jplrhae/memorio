@@ -58,8 +58,23 @@ export default function StaticAllocationView() {
   };
 
   const removeProcess = (id: number) => {
-    const newPartitions = processes.filter((p) => p.id !== id);
-    setProcesses(newPartitions);
+    const processToRemove = processes.find((p) => p.id === id);
+    if (processToRemove?.allocatedIn) {
+      const partitionAllocated = processToRemove.allocatedIn;
+      addSimulationLog(
+        `Killed process ${id} which was allocated in partition ${partitionAllocated.id}, freeing ${partitionAllocated.used}kb.`
+      );
+      partitions.find((p) => p.id === partitionAllocated.id)!.used = 0;
+      const processesToUnlock = processes.filter(
+        (process) => process.size <= partitionAllocated.size
+      );
+      for (const process of processesToUnlock) {
+        process.isLocked = false;
+      }
+    }
+
+    const newProcesses = processes.filter((p) => p.id !== id);
+    setProcesses(newProcesses);
   };
 
   const addSimulationLog = (text: string) => {
@@ -76,16 +91,13 @@ export default function StaticAllocationView() {
   };
 
   const toggleSimulation = () => {
-    // If the simulation is running, stop it and clear the data
     if (isSimulationRunning) {
       setIsSimulationRunning(false);
 
-      // Clear the "used" for partitions
       setPartitions((prevPartitions) =>
         prevPartitions.map((partition) => ({ ...partition, used: 0 }))
       );
 
-      // Clear the "allocatedIn" for processes
       setProcesses((prevProcesses) =>
         prevProcesses.map((process) => ({
           ...process,
@@ -94,26 +106,22 @@ export default function StaticAllocationView() {
         }))
       );
     } else {
-      // If the simulation is not running, start it
       setIsSimulationRunning(true);
       setSimulations([]);
     }
   };
 
   const getPartitionFragmentationsInKbytes = () => {
-    // Calculate the total fragmentation
     return partitions.reduce((acc, partition) => {
       return acc + partition.size - partition.used;
     }, 0);
   };
 
   const getPartitionFragmentationsInPercentage = () => {
-    // Calculate the total fragmentation
     const totalFragmentation = partitions.reduce((acc, partition) => {
       return acc + partition.size - partition.used;
     }, 0);
 
-    // Calculate the percentage
     return (
       (totalFragmentation /
         partitions.reduce((acc, partition) => {
@@ -128,10 +136,6 @@ export default function StaticAllocationView() {
   };
 
   const allocateProcesses = () => {
-    // Your simulation logic here
-    // This example assumes a very basic allocation where each process
-    // is assigned to the first available partition that can accommodate its size
-
     const processesToAllocate = processes.filter(
       (process) => process.allocatedIn === null && !process.isLocked
     );
@@ -167,10 +171,8 @@ export default function StaticAllocationView() {
           "for process",
           process.id
         );
-        // Assign the process to the partition
         process.allocatedIn = availablePartition;
 
-        // Update the partition usage
         availablePartition.used = process.size;
         addSimulationLog(
           `Process ${process.id} allocated in partition ${
@@ -198,13 +200,10 @@ export default function StaticAllocationView() {
   useEffect(() => {
     if (isSimulationRunning) {
       const intervalId = setInterval(() => {
-        // Simulate process allocation
         allocateProcesses();
-        // Update state to trigger re-render with new allocations
         setProcesses([...processes]);
-      }, 2000); // Adjust the interval as needed
+      }, 2000);
 
-      // Return a cleanup function to stop the simulation when the component unmounts
       return () => clearInterval(intervalId);
     }
   }, [isSimulationRunning, processes, partitions]);
@@ -262,10 +261,10 @@ export default function StaticAllocationView() {
       >
         <button
           style={{
-            backgroundColor: hasPartitionsAndProcesses
-              ? isSimulationRunning
-                ? "#e74c3c"
-                : "#2ecc71"
+            backgroundColor: isSimulationRunning
+              ? "#e74c3c"
+              : hasPartitionsAndProcesses
+              ? "#2ecc71"
               : "#7f8c8d",
             color: "white",
             padding: "15px",
@@ -275,7 +274,7 @@ export default function StaticAllocationView() {
             border: "none",
             width: "200px",
           }}
-          disabled={!hasPartitionsAndProcesses}
+          disabled={!isSimulationRunning && !hasPartitionsAndProcesses}
           onClick={toggleSimulation}
         >
           {isSimulationRunning ? "Stop Simulation" : "Start Simulation"}
@@ -321,6 +320,7 @@ export default function StaticAllocationView() {
               marginLeft: 9,
               cursor: "pointer",
               fontSize: 14,
+              userSelect: "none",
             }}
             onClick={() => setDoGenerateLogs(!doGenerateLogs)}
           >
@@ -332,6 +332,7 @@ export default function StaticAllocationView() {
               marginLeft: 9,
               cursor: "pointer",
               fontSize: 14,
+              userSelect: "none",
             }}
             onClick={() => setSimulations([])}
           >

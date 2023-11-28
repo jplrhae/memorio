@@ -32,11 +32,11 @@ const PartitionForm: React.FC<PartitionFormProps> = ({
         style={{
           display: "flex",
           flexDirection: "column",
-          gap: "15px", // Increased gap for better spacing
-          backgroundColor: "#2c3e50", // Dark background color
+          gap: "15px",
+          backgroundColor: "#2c3e50",
           padding: "15px",
           borderRadius: "8px",
-          boxShadow: "0 5px 5px rgba(0, 0, 0, 0.1)", // Subtle shadow
+          boxShadow: "0 5px 5px rgba(0, 0, 0, 0.1)",
         }}
         onSubmit={handleSubmit}
       >
@@ -49,7 +49,7 @@ const PartitionForm: React.FC<PartitionFormProps> = ({
             style={{
               padding: "8px",
               borderRadius: "5px",
-              border: "1px solid #34495e", // Border color
+              border: "1px solid #34495e",
             }}
           />
         </label>
@@ -57,7 +57,7 @@ const PartitionForm: React.FC<PartitionFormProps> = ({
           type="submit"
           disabled={partitionSize <= 0}
           style={{
-            backgroundColor: partitionSize <= 0 ? "#7f8c8d" : "#3498db", // Button color
+            backgroundColor: partitionSize <= 0 ? "#7f8c8d" : "#3498db",
             color: partitionSize <= 0 ? "black" : "white",
             padding: "10px",
             borderRadius: "5px",
@@ -71,7 +71,7 @@ const PartitionForm: React.FC<PartitionFormProps> = ({
         <button
           type="submit"
           style={{
-            backgroundColor: "#2ecc71", // Different button color
+            backgroundColor: "#2ecc71",
             color: "white",
             padding: "10px",
             borderRadius: "5px",
@@ -86,7 +86,7 @@ const PartitionForm: React.FC<PartitionFormProps> = ({
       <button
         onClick={() => onClearPartitions()}
         style={{
-          backgroundColor: "#e74c3c", // Red color for clear button
+          backgroundColor: "#e74c3c",
           color: "white",
           padding: "10px",
           borderRadius: "5px",

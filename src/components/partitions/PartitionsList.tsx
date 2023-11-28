@@ -10,20 +10,20 @@ export default function PartitionsList(props: IPartitionsListProps) {
   return (
     <div
       style={{
-        border: "1px solid #34495e", // Darker border color
+        border: "1px solid #34495e",
         display: "flex",
         flexDirection: "column",
         width: "400px",
         textAlign: "center",
         borderRadius: "5px",
-        overflow: "hidden", // Hide overflowing content
+        overflow: "hidden",
       }}
     >
       {props.partitions.length === 0 ? (
         <div
           style={{
             padding: "20px",
-            borderBottom: "1px solid #34495e", // Border to separate when no partitions are added
+            borderBottom: "1px solid #34495e",
           }}
         >
           No partitions added.
@@ -33,7 +33,7 @@ export default function PartitionsList(props: IPartitionsListProps) {
           <div
             key={partition.id}
             style={{
-              border: "1px dotted #34495e", // Dotted border
+              border: "1px dotted #34495e",
               display: "flex",
               justifyContent: "space-between",
               alignItems: "center",
@@ -51,7 +51,7 @@ export default function PartitionsList(props: IPartitionsListProps) {
               <button
                 onClick={() => props.onPartitionRemoved(partition.id)}
                 style={{
-                  backgroundColor: "#e74c3c", // Red color for remove button
+                  backgroundColor: "#e74c3c",
                   color: "white",
                   padding: "8px",
                   borderRadius: "5px",

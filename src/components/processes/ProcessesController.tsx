@@ -29,11 +29,11 @@ export default function ProcessController(props: IProcessesFormProps) {
         style={{
           display: "flex",
           flexDirection: "column",
-          gap: "15px", // Increased gap for better spacing
-          backgroundColor: "#2c3e50", // Dark background color
+          gap: "15px",
+          backgroundColor: "#2c3e50",
           padding: "15px",
           borderRadius: "8px",
-          boxShadow: "0 5px 5px rgba(0, 0, 0, 0.1)", // Subtle shadow
+          boxShadow: "0 5px 5px rgba(0, 0, 0, 0.1)",
         }}
         onSubmit={handleSubmit}
       >
@@ -46,7 +46,7 @@ export default function ProcessController(props: IProcessesFormProps) {
             style={{
               padding: "8px",
               borderRadius: "5px",
-              border: "1px solid #34495e", // Border color
+              border: "1px solid #34495e",
             }}
           />
         </label>
@@ -54,7 +54,7 @@ export default function ProcessController(props: IProcessesFormProps) {
           type="submit"
           disabled={processSize <= 0}
           style={{
-            backgroundColor: processSize <= 0 ? "#7f8c8d" : "#3498db", // Button color
+            backgroundColor: processSize <= 0 ? "#7f8c8d" : "#3498db",
             color: processSize <= 0 ? "black" : "white",
             padding: "10px",
             borderRadius: "5px",
@@ -68,7 +68,7 @@ export default function ProcessController(props: IProcessesFormProps) {
         <button
           type="submit"
           style={{
-            backgroundColor: "#2ecc71", // Different button color
+            backgroundColor: "#2ecc71",
             color: "white",
             padding: "10px",
             borderRadius: "5px",
@@ -83,7 +83,7 @@ export default function ProcessController(props: IProcessesFormProps) {
       <button
         onClick={() => props.onClearProcesses()}
         style={{
-          backgroundColor: "#e74c3c", // Red color for clear button
+          backgroundColor: "#e74c3c",
           color: "white",
           padding: "10px",
           borderRadius: "5px",

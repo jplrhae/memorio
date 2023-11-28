@@ -13,11 +13,12 @@ function App() {
       case "static":
         return (
           <div>
-            <h1>Static Allocation</h1>
+            <h1>Static Allocation (relocatable)</h1>
             <p>
-              Static Allocation assigns fixed-size partitions to processes,
-              creating a stable environment. Add partitions and allocate
-              processes with precision using the controls below.
+              In relocatable static allocation, processes are allocated in
+              fixed-size partitions that can accomodate them.
+              <br /> Add partitions and processes, then observe how they are
+              allocated by running the simulation.
             </p>
             <StaticAllocationView />
           </div>
