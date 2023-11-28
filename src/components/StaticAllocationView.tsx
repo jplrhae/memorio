@@ -73,13 +73,38 @@ export default function StaticAllocationView() {
       setProcesses((prevProcesses) =>
         prevProcesses.map((process) => ({ ...process, allocatedIn: null }))
       );
-
-      // Clear the simulation log
-      setSimulations([]);
     } else {
       // If the simulation is not running, start it
       setIsSimulationRunning(true);
+      setSimulations([]);
     }
+  };
+
+  const getPartitionFragmentationsInKbytes = () => {
+    // Calculate the total fragmentation
+    return partitions.reduce((acc, partition) => {
+      return acc + partition.size - partition.used;
+    }, 0);
+  };
+
+  const getPartitionFragmentationsInPercentage = () => {
+    // Calculate the total fragmentation
+    const totalFragmentation = partitions.reduce((acc, partition) => {
+      return acc + partition.size - partition.used;
+    }, 0);
+
+    // Calculate the percentage
+    return (
+      (totalFragmentation /
+        partitions.reduce((acc, partition) => {
+          return acc + partition.size;
+        }, 0)) *
+      100
+    ).toFixed(2);
+  };
+
+  const getPartitionOccupationPercentage = (used: number, size: number) => {
+    return ((used / size) * 100).toFixed(2);
   };
 
   const allocateProcesses = () => {
@@ -115,7 +140,14 @@ export default function StaticAllocationView() {
           {
             id: prevSimulations.length + 1,
             date: new Date(),
-            text: `Process ${process.id} allocated in partition ${availablePartition.id}`,
+            text: `Process ${process.id} allocated in partition ${
+              availablePartition.id
+            }, occupying ${process.size} of ${
+              availablePartition.size
+            }kb (${getPartitionOccupationPercentage(
+              process.size,
+              availablePartition.size
+            )}%)`,
           },
         ]);
       } else {
@@ -124,7 +156,11 @@ export default function StaticAllocationView() {
           {
             id: prevSimulations.length + 1,
             date: new Date(),
-            text: `No available partitions for process ${process.id}`,
+            text: `No available partitions for process ${
+              process.id
+            } (with size ${
+              process.size
+            }kb). Fragmentation is ${getPartitionFragmentationsInKbytes()}kb, representing ${getPartitionFragmentationsInPercentage()}% of total space.`,
           },
         ]);
         console.log("No available partitions for process", process.id);
@@ -234,7 +270,7 @@ export default function StaticAllocationView() {
                 background: "#ecf0f1",
               }}
             >
-              {simulation.text}
+              {simulation.date.toUTCString()} - {simulation.text}
             </div>
           ))}
         </div>
