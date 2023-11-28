@@ -65,7 +65,7 @@ export default function ProcessesList(props: IProcessesListProps) {
                   border: "none",
                 }}
               >
-                Kill
+                kill
               </button>
             )}
             {!props.isSimulationRunning && (

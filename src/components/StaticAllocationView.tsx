@@ -90,6 +90,28 @@ export default function StaticAllocationView() {
     ]);
   };
 
+  const downloadSimulationLog = () => {
+    const partitionsData = partitions.reduce((acc, partition) => {
+      return `${acc}Partition ${partition.id} - ${partition.size}kb\n`;
+    }, "");
+    const processesData = processes.reduce((acc, process) => {
+      return `${acc}Process ${process.id} - ${process.size}kb\n`;
+    }, "");
+    const simulationLog = simulations.reduce((acc, simulation) => {
+      return `${acc}${simulation.date.toUTCString()} - ${simulation.text}\n`;
+    }, "");
+    const simulationData = `Strategy: ${strategy}\nPartitions:\n${partitionsData}\nProcesses:\n${processesData}\nSimulation Log:\n${simulationLog}`;
+
+    const element = document.createElement("a");
+    const file = new Blob([simulationData], {
+      type: "text/plain",
+    });
+    element.href = URL.createObjectURL(file);
+    element.download = "simulation-log.txt";
+    document.body.appendChild(element);
+    element.click();
+  };
+
   const toggleSimulation = () => {
     if (isSimulationRunning) {
       setIsSimulationRunning(false);
@@ -338,6 +360,20 @@ export default function StaticAllocationView() {
           >
             clear
           </span>
+          {simulations.length > 0 && (
+            <span
+              style={{
+                color: "green",
+                marginLeft: 9,
+                cursor: "pointer",
+                fontSize: 14,
+                userSelect: "none",
+              }}
+              onClick={() => downloadSimulationLog()}
+            >
+              download
+            </span>
+          )}
         </div>
         {simulations.map((simulation) => (
           <div
