@@ -35,6 +35,11 @@ export default function ProcessesList(props: IProcessesListProps) {
             style={{
               border: "1px dotted #34495e", // Dotted border
               display: "flex",
+              backgroundColor: process.isLocked
+                ? "#e74c3c"
+                : process.allocatedIn
+                ? "#2ecc71"
+                : "#3498db",
               justifyContent: "space-between",
               alignItems: "center",
               padding: "10px",

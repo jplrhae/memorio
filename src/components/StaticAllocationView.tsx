@@ -28,6 +28,7 @@ export default function StaticAllocationView() {
   const [processes, setProcesses] = useState<IProcess[]>([]);
   const [simulations, setSimulations] = useState<ISimulationData[]>([]);
   const [strategy, setStrategy] = useState<string>("first-fit");
+  const [doGenerateLogs, setDoGenerateLogs] = useState<boolean>(true);
 
   const [isSimulationRunning, setIsSimulationRunning] = useState(false);
   const hasPartitionsAndProcesses =
@@ -59,6 +60,19 @@ export default function StaticAllocationView() {
   const removeProcess = (id: number) => {
     const newPartitions = processes.filter((p) => p.id !== id);
     setProcesses(newPartitions);
+  };
+
+  const addSimulationLog = (text: string) => {
+    if (!doGenerateLogs) return;
+
+    setSimulations((prevSimulations) => [
+      ...prevSimulations,
+      {
+        id: prevSimulations.length + 1,
+        date: new Date(),
+        text,
+      },
+    ]);
   };
 
   const toggleSimulation = () => {
@@ -123,14 +137,7 @@ export default function StaticAllocationView() {
     );
 
     if (processesToAllocate.length === 0) {
-      setSimulations((prevSimulations) => [
-        ...prevSimulations,
-        {
-          id: prevSimulations.length + 1,
-          date: new Date(),
-          text: "No other processes can be allocated.",
-        },
-      ]);
+      addSimulationLog("No other processes can be allocated.");
       console.log("No processes to allocate");
       return;
     }
@@ -144,14 +151,16 @@ export default function StaticAllocationView() {
           (partition) => !partition.used && partition.size >= process.size
         );
       } else {
-        availablePartition = partitions
+        const sortedPartitions = partitions
           .filter(
             (partition) => !partition.used && partition.size >= process.size
           )
-          .sort((a, b) => a.size - b.size)[0];
+          .sort((a, b) => a.size - b.size);
+
+        availablePartition = sortedPartitions[0];
       }
 
-      if (availablePartition) {
+      if (availablePartition !== undefined) {
         console.log(
           "Found available partition",
           availablePartition.id,
@@ -163,34 +172,22 @@ export default function StaticAllocationView() {
 
         // Update the partition usage
         availablePartition.used = process.size;
-        setSimulations((prevSimulations) => [
-          ...prevSimulations,
-          {
-            id: prevSimulations.length + 1,
-            date: new Date(),
-            text: `Process ${process.id} allocated in partition ${
-              availablePartition.id
-            }, occupying ${process.size} of ${
-              availablePartition.size
-            }kb (${getPartitionOccupationPercentage(
-              process.size,
-              availablePartition.size
-            )}%)`,
-          },
-        ]);
+        addSimulationLog(
+          `Process ${process.id} allocated in partition ${
+            availablePartition.id
+          }, occupying ${process.size} of ${
+            availablePartition.size
+          }kb (${getPartitionOccupationPercentage(
+            process.size,
+            availablePartition.size
+          )}%)`
+        );
       } else {
-        setSimulations((prevSimulations) => [
-          ...prevSimulations,
-          {
-            id: prevSimulations.length + 1,
-            date: new Date(),
-            text: `No available partitions for process ${
-              process.id
-            } (with size ${
-              process.size
-            }kb). Fragmentation is ${getPartitionFragmentationsInKbytes()}kb, representing ${getPartitionFragmentationsInPercentage()}% of total space.`,
-          },
-        ]);
+        addSimulationLog(
+          `No available partitions for process ${process.id} (with size ${
+            process.size
+          }kb). Fragmentation is ${getPartitionFragmentationsInKbytes()}kb, representing ${getPartitionFragmentationsInPercentage()}% of total space.`
+        );
         process.isLocked = true;
 
         console.log("No available partitions for process", process.id);
@@ -307,40 +304,54 @@ export default function StaticAllocationView() {
       {!hasPartitionsAndProcesses && (
         <div>Add partitions and processes to start the simulation</div>
       )}
-      {simulations.length > 0 && (
-        <div
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            gap: "10px",
-            marginTop: "20px",
-            width: "100%",
-          }}
-        >
-          <div style={{ fontWeight: "bold" }}>
-            Simulation Log{" "}
-            <span
-              style={{ color: "red", marginLeft: 9, cursor: "pointer" }}
-              onClick={() => setSimulations([])}
-            >
-              clear
-            </span>
-          </div>
-          {simulations.map((simulation) => (
-            <div
-              key={simulation.id}
-              style={{
-                border: "1px solid #34495e",
-                borderRadius: "5px",
-                padding: "10px",
-                background: "#ecf0f1",
-              }}
-            >
-              {simulation.date.toUTCString()} - {simulation.text}
-            </div>
-          ))}
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          gap: "10px",
+          marginTop: "20px",
+          width: "100%",
+        }}
+      >
+        <div style={{ fontWeight: "bold" }}>
+          Simulation Log{" "}
+          <span
+            style={{
+              color: "blue",
+              marginLeft: 9,
+              cursor: "pointer",
+              fontSize: 14,
+            }}
+            onClick={() => setDoGenerateLogs(!doGenerateLogs)}
+          >
+            {doGenerateLogs ? "on" : "off"}
+          </span>{" "}
+          <span
+            style={{
+              color: "red",
+              marginLeft: 9,
+              cursor: "pointer",
+              fontSize: 14,
+            }}
+            onClick={() => setSimulations([])}
+          >
+            clear
+          </span>
         </div>
-      )}
+        {simulations.map((simulation) => (
+          <div
+            key={simulation.id}
+            style={{
+              border: "1px solid #34495e",
+              borderRadius: "5px",
+              padding: "10px",
+              background: "#ecf0f1",
+            }}
+          >
+            {simulation.date.toUTCString()} - {simulation.text}
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
