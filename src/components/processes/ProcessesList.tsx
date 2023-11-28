@@ -42,6 +42,11 @@ export default function ProcessesList(props: IProcessesListProps) {
           >
             <div style={{ fontWeight: "bold" }}>PR{process.id}</div>
             <div>{process.size}kb</div>
+            <div>
+              {process.allocatedIn
+                ? `Allocated in partition ${process.allocatedIn.id}`
+                : "Not allocated"}
+            </div>
             {!props.isSimulationRunning && (
               <button
                 onClick={() => props.onProcessRemoved(process.id)}
