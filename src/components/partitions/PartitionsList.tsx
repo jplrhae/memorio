@@ -38,8 +38,12 @@ export default function PartitionsList(props: IPartitionsListProps) {
               justifyContent: "space-between",
               alignItems: "center",
               padding: "10px",
+              background: `linear-gradient(to right, #2ecc71 ${
+                (partition.used / partition.size) * 100
+              }%, #3498db ${(partition.used / partition.size) * 100}%)`,
             }}
           >
+            <div style={{ fontWeight: "bold" }}>PT{partition.id}</div>
             <div>{partition.used}kb</div>
             <div>/</div>
             <div>{partition.size}kb</div>

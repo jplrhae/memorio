@@ -40,6 +40,7 @@ export default function ProcessesList(props: IProcessesListProps) {
               padding: "10px",
             }}
           >
+            <div style={{ fontWeight: "bold" }}>PR{process.id}</div>
             <div>{process.size}kb</div>
             {!props.isSimulationRunning && (
               <button

@@ -15,10 +15,20 @@ export interface IProcess {
   size: number;
 }
 
+const initialPartitions: IPartition[] = [
+  {
+    id: 1,
+    size: 20,
+    used: 15,
+  },
+];
+
 export default function StaticAllocationView() {
-  const [partitions, setPartitions] = useState<IPartition[]>([]);
+  const [partitions, setPartitions] = useState<IPartition[]>(initialPartitions);
   const [processes, setProcesses] = useState<IProcess[]>([]);
   const [isSimulationRunning, setIsSimulationRunning] = useState(false);
+  const hasPartitionsAndProcesses =
+    partitions.length > 0 && processes.length > 0;
 
   const addPartition = (size: number) => {
     const newPartition: IPartition = {
@@ -93,7 +103,11 @@ export default function StaticAllocationView() {
       </div>
       <button
         style={{
-          backgroundColor: isSimulationRunning ? "#e74c3c" : "#2ecc71",
+          backgroundColor: hasPartitionsAndProcesses
+            ? isSimulationRunning
+              ? "#e74c3c"
+              : "#2ecc71"
+            : "#7f8c8d",
           color: "white",
           padding: "15px",
           borderRadius: "8px",
@@ -102,10 +116,14 @@ export default function StaticAllocationView() {
           border: "none",
           width: "200px",
         }}
+        disabled={!hasPartitionsAndProcesses}
         onClick={() => setIsSimulationRunning(!isSimulationRunning)}
       >
         {isSimulationRunning ? "Stop Simulation" : "Start Simulation"}
       </button>
+      {!hasPartitionsAndProcesses && (
+        <div>Add partitions and processes to start the simulation</div>
+      )}
     </div>
   );
 }
