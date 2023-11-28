@@ -1,14 +1,8 @@
 import "./App.css";
-import Control from "./components/Control";
-import Visualizer from "./components/Visualizer";
+import StaticAllocationView from "./components/StaticAllocationView";
 
 function App() {
-  return (
-    <>
-      <Control />
-      <Visualizer />
-    </>
-  );
+  return <StaticAllocationView />;
 }
 
 export default App;
