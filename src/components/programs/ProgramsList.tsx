@@ -50,9 +50,9 @@ export default function ProgramsList(props: IProgramsListProps) {
             <div>
               {program.allocatedIn
                 ? `Allocated in partition ${program.allocatedIn.id}`
-                : "Not allocated"}
+                : program.isAllocated ? "Program allocated in memory" : "Not allocated"}
             </div>
-            {program.allocatedIn && (
+            {(program.allocatedIn || program.isAllocated) && (
               <button
                 onClick={() => props.onProgramRemoved(program.id)}
                 style={{

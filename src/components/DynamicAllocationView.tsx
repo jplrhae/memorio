@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { IProgram, ISimulationData } from "../App";
 import ProgramsController from "./programs/ProgramsController";
 import ProgramsList from "./programs/ProgramsList";
@@ -20,7 +20,7 @@ export default function DynamicAllocationView() {
     });
   const [isSimulationRunning, setIsSimulationRunning] =
     useState<boolean>(false);
-  const [doGenerateLogs, setDoGenerateLogs] = useState<boolean>(false);
+  const [doGenerateLogs, setDoGenerateLogs] = useState<boolean>(true);
   const [simulations, setSimulations] = useState<ISimulationData[]>([]);
   const hasProgramsAndTotalSize =
     programs.length > 0 && dynamicAllocationData.totalSize > 0;
@@ -40,9 +40,23 @@ export default function DynamicAllocationView() {
   const removeProgram = (id: number) => {
     const programToRemove = programs.find((p) => p.id === id);
     if (programToRemove?.isAllocated) {
+      const totalSize = dynamicAllocationData.totalSize;
+      
       addSimulationLog(
         `Killed program ${id} which was allocated, freeing ${programToRemove.size}kb.`
-      );
+        );
+        const newAllocatedProgramsList = dynamicAllocationData.allocatedPrograms.filter((p) => (p.id !== id));
+      let totalUsedSize = 0;
+      newAllocatedProgramsList.forEach(program => {
+        totalUsedSize = totalUsedSize + program.size;
+      });
+      
+      const availableSize = totalSize - totalUsedSize;
+      const programsToUnlock = programs.filter((p) => (p.size <= availableSize));
+      for (const program of programsToUnlock) {
+        program.isLocked = false;
+      }
+      setDynamicAllocationData({...dynamicAllocationData, allocatedPrograms: newAllocatedProgramsList});
     }
 
     const newPrograms = programs.filter((p) => p.id !== id);
@@ -74,6 +88,7 @@ export default function DynamicAllocationView() {
           isLocked: false,
         }))
       );
+      setDynamicAllocationData({...dynamicAllocationData, allocatedPrograms: []});
     } else {
       setIsSimulationRunning(true);
       setInitialPrograms([...programs]);
@@ -99,6 +114,73 @@ export default function DynamicAllocationView() {
     document.body.appendChild(element);
     element.click();
   };
+
+  const allocatePrograms = () => {
+    console.log("Allocating...");
+    
+    const programsToAllocate = programs.filter(
+      (program) => !program.isAllocated && !program.isLocked
+    );
+    
+    if (programsToAllocate.length === 0) {
+      addSimulationLog("No other programs can be allocated.");
+      return;
+    }
+
+    console.log(programsToAllocate);
+
+    let totalUsedSize = 0;
+
+    dynamicAllocationData.allocatedPrograms.forEach((program) => {
+      totalUsedSize = totalUsedSize + program.size
+    });
+
+    console.log("Total used size is", totalUsedSize);
+
+    let availableSize = dynamicAllocationData.totalSize - totalUsedSize;
+
+    console.log("Available size", availableSize);
+
+    for (const program of programsToAllocate) {
+      console.log("Allocating program", program.id);
+
+        if (program.size <= availableSize) {
+          console.log(
+            "Program",
+            program.id,
+            "fits in total allocation"
+          );
+          dynamicAllocationData.allocatedPrograms.push(program);
+          program.isAllocated = true;
+          addSimulationLog(
+            `Program ${program.id} allocated in memory occupying ${program.size}kb of ${
+              availableSize
+            }kb. Total size was ${dynamicAllocationData.totalSize}`
+            );
+            availableSize = availableSize - program.size;
+        } else {
+          addSimulationLog(
+            `Program ${program.id} (with size ${
+              program.size
+            }kb) cannot be allocated in total memory. Available space is ${availableSize}kb.`
+          );
+          program.isLocked = true;
+    
+          console.log("No available partitions for program", program.id);
+        }
+    }
+  };
+
+  useEffect(() => {
+    if (isSimulationRunning) {
+      const intervalId = setInterval(() => {
+        allocatePrograms();
+        setPrograms([...programs]);
+      }, 2000);
+
+      return () => clearInterval(intervalId);
+    }
+  }, [isSimulationRunning, programs]);
 
   return (
     <div
@@ -137,6 +219,7 @@ export default function DynamicAllocationView() {
           <TotalMemoryList
             dynamicAllocationData={dynamicAllocationData}
             isSimulationRunning={isSimulationRunning}
+            onProgramRemoved={removeProgram}
           />
         </div>
         <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
@@ -189,15 +272,6 @@ export default function DynamicAllocationView() {
             onClick={() => setStrategy("first-fit")}
           >
             [ first-fit ]
-          </div>
-          <div
-            style={{
-              color: strategy === "best-fit" ? "blue" : "black",
-              cursor: "pointer",
-            }}
-            onClick={() => setStrategy("best-fit")}
-          >
-            [ best-fit ]
           </div>
         </div>
       </div>
