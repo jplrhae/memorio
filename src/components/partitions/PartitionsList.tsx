@@ -1,4 +1,4 @@
-import { IPartition } from "../StaticAllocationView";
+import { IPartition } from "../../App";
 
 interface IPartitionsListProps {
   partitions: IPartition[];

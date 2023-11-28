@@ -1,4 +1,4 @@
-import { IProgram } from "../StaticAllocationView";
+import { IProgram } from "../../App";
 
 interface IProgramsListProps {
   programs: IProgram[];

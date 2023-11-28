@@ -13,7 +13,7 @@ export default function Header() {
         boxShadow: "0 5px 5px rgba(0, 0, 0, 0.1)",
       }}
     >
-      Memorio, a Memory Management Simulator
+      Memorio, a Memory Allocation Simulator
     </div>
   );
 }

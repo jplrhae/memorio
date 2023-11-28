@@ -3,25 +3,7 @@ import PartitionController from "./partitions/PartitionController";
 import PartitionsList from "./partitions/PartitionsList";
 import ProgramsController from "./programs/ProgramsController";
 import ProgramsList from "./programs/ProgramsList";
-
-export interface IPartition {
-  id: number;
-  size: number;
-  used: number;
-}
-
-export interface IProgram {
-  id: number;
-  size: number;
-  allocatedIn: IPartition | null;
-  isLocked?: boolean;
-}
-
-export interface ISimulationData {
-  id: number;
-  date: Date;
-  text: string;
-}
+import { IPartition, IProgram, ISimulationData } from "../App";
 
 export default function StaticAllocationView() {
   const [partitions, setPartitions] = useState<IPartition[]>([]);
@@ -50,12 +32,12 @@ export default function StaticAllocationView() {
   };
 
   const addProgram = (size: number) => {
-    const newPartition: IProgram = {
+    const newProgram: IProgram = {
       id: programs.length + 1,
       size,
       allocatedIn: null,
     };
-    setPrograms([...programs, newPartition]);
+    setPrograms([...programs, newProgram]);
   };
 
   const removeProgram = (id: number) => {
@@ -108,7 +90,7 @@ export default function StaticAllocationView() {
       type: "text/plain",
     });
     element.href = URL.createObjectURL(file);
-    element.download = "simulation-log.txt";
+    element.download = "simulation-log-static.txt";
     document.body.appendChild(element);
     element.click();
   };
