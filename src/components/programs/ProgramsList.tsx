@@ -1,12 +1,12 @@
-import { IProcess } from "../StaticAllocationView";
+import { IProgram } from "../StaticAllocationView";
 
-interface IProcessesListProps {
-  processes: IProcess[];
-  onProcessRemoved: (id: number) => void;
+interface IProgramsListProps {
+  programs: IProgram[];
+  onProgramRemoved: (id: number) => void;
   isSimulationRunning: boolean;
 }
 
-export default function ProcessesList(props: IProcessesListProps) {
+export default function ProgramsList(props: IProgramsListProps) {
   return (
     <div
       style={{
@@ -19,25 +19,25 @@ export default function ProcessesList(props: IProcessesListProps) {
         overflow: "hidden",
       }}
     >
-      {props.processes.length === 0 ? (
+      {props.programs.length === 0 ? (
         <div
           style={{
             padding: "20px",
             borderBottom: "1px solid #34495e",
           }}
         >
-          No processes added.
+          No programs added.
         </div>
       ) : (
-        props.processes.map((process) => (
+        props.programs.map((program) => (
           <div
-            key={process.id}
+            key={program.id}
             style={{
               border: "1px dotted #34495e",
               display: "flex",
-              backgroundColor: process.isLocked
+              backgroundColor: program.isLocked
                 ? "#e74c3c"
-                : process.allocatedIn
+                : program.allocatedIn
                 ? "#2ecc71"
                 : "#3498db",
               justifyContent: "space-between",
@@ -45,16 +45,16 @@ export default function ProcessesList(props: IProcessesListProps) {
               padding: "10px",
             }}
           >
-            <div style={{ fontWeight: "bold" }}>PR{process.id}</div>
-            <div>{process.size}kb</div>
+            <div style={{ fontWeight: "bold" }}>PR{program.id}</div>
+            <div>{program.size}kb</div>
             <div>
-              {process.allocatedIn
-                ? `Allocated in partition ${process.allocatedIn.id}`
+              {program.allocatedIn
+                ? `Allocated in partition ${program.allocatedIn.id}`
                 : "Not allocated"}
             </div>
-            {process.allocatedIn && (
+            {program.allocatedIn && (
               <button
-                onClick={() => props.onProcessRemoved(process.id)}
+                onClick={() => props.onProgramRemoved(program.id)}
                 style={{
                   backgroundColor: "#e74c3c",
                   color: "white",
@@ -70,7 +70,7 @@ export default function ProcessesList(props: IProcessesListProps) {
             )}
             {!props.isSimulationRunning && (
               <button
-                onClick={() => props.onProcessRemoved(process.id)}
+                onClick={() => props.onProgramRemoved(program.id)}
                 style={{
                   backgroundColor: "#e74c3c",
                   color: "white",

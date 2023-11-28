@@ -1,5 +1,3 @@
-import { useState } from "react";
-
 interface ITabBarProps {
   onTabChange: (tab: string) => void;
   views: string[];

@@ -15,9 +15,9 @@ function App() {
           <div>
             <h1>Static Allocation (relocatable)</h1>
             <p>
-              In relocatable static allocation, processes are allocated in
+              In relocatable static allocation, programs are allocated in
               fixed-size partitions that can accomodate them.
-              <br /> Add partitions and processes, then observe how they are
+              <br /> Add partitions and programs, then observe how they are
               allocated by running the simulation.
             </p>
             <StaticAllocationView />

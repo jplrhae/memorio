@@ -1,25 +1,25 @@
 import { useState, ChangeEvent, FormEvent } from "react";
 
-interface IProcessesFormProps {
-  onAddProcess: (size: number) => void;
-  onClearProcesses: () => void;
+interface IProgramsFormProps {
+  onAddProgram: (size: number) => void;
+  onClearPrograms: () => void;
 }
 
-export default function ProcessController(props: IProcessesFormProps) {
-  const [processSize, setProcessSize] = useState<number>(0);
+export default function ProgramsController(props: IProgramsFormProps) {
+  const [programSize, setProgramSize] = useState<number>(0);
 
   const handleSizeChange = (event: ChangeEvent<HTMLInputElement>) => {
     const newSize = parseFloat(event.target.value);
-    setProcessSize(newSize);
+    setProgramSize(newSize);
   };
 
   const handleSubmit = (event: FormEvent) => {
     event.preventDefault();
-    if (processSize > 0) {
-      props.onAddProcess(processSize);
-      setProcessSize(0);
+    if (programSize > 0) {
+      props.onAddProgram(programSize);
+      setProgramSize(0);
     } else {
-      props.onAddProcess(Math.floor(Math.random() * 10) + 1);
+      props.onAddProgram(Math.floor(Math.random() * 10) + 1);
     }
   };
 
@@ -38,10 +38,10 @@ export default function ProcessController(props: IProcessesFormProps) {
         onSubmit={handleSubmit}
       >
         <label style={{ color: "white" }}>
-          Process Size (KB):
+          Program Size (KB):
           <input
             type="number"
-            value={processSize}
+            value={programSize}
             onChange={handleSizeChange}
             style={{
               padding: "8px",
@@ -52,18 +52,18 @@ export default function ProcessController(props: IProcessesFormProps) {
         </label>
         <button
           type="submit"
-          disabled={processSize <= 0}
+          disabled={programSize <= 0}
           style={{
-            backgroundColor: processSize <= 0 ? "#7f8c8d" : "#3498db",
-            color: processSize <= 0 ? "black" : "white",
+            backgroundColor: programSize <= 0 ? "#7f8c8d" : "#3498db",
+            color: programSize <= 0 ? "black" : "white",
             padding: "10px",
             borderRadius: "5px",
-            cursor: processSize > 0 ? "pointer" : "not-allowed",
+            cursor: programSize > 0 ? "pointer" : "not-allowed",
             outline: "none",
             border: "none",
           }}
         >
-          Add Process
+          Add Program
         </button>
         <button
           type="submit"
@@ -77,11 +77,11 @@ export default function ProcessController(props: IProcessesFormProps) {
             border: "none",
           }}
         >
-          Add Random Process
+          Add Random Program
         </button>
       </form>
       <button
-        onClick={() => props.onClearProcesses()}
+        onClick={() => props.onClearPrograms()}
         style={{
           backgroundColor: "#e74c3c",
           color: "white",
@@ -92,7 +92,7 @@ export default function ProcessController(props: IProcessesFormProps) {
           border: "none",
         }}
       >
-        Clear All Processes
+        Clear All Programs
       </button>
     </>
   );

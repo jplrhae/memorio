@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import PartitionController from "./partitions/PartitionController";
 import PartitionsList from "./partitions/PartitionsList";
-import ProcessController from "./processes/ProcessesController";
-import ProcessesList from "./processes/ProcessesList";
+import ProgramsController from "./programs/ProgramsController";
+import ProgramsList from "./programs/ProgramsList";
 
 export interface IPartition {
   id: number;
@@ -10,7 +10,7 @@ export interface IPartition {
   used: number;
 }
 
-export interface IProcess {
+export interface IProgram {
   id: number;
   size: number;
   allocatedIn: IPartition | null;
@@ -25,14 +25,15 @@ export interface ISimulationData {
 
 export default function StaticAllocationView() {
   const [partitions, setPartitions] = useState<IPartition[]>([]);
-  const [processes, setProcesses] = useState<IProcess[]>([]);
+  const [programs, setPrograms] = useState<IProgram[]>([]);
   const [simulations, setSimulations] = useState<ISimulationData[]>([]);
   const [strategy, setStrategy] = useState<string>("first-fit");
   const [doGenerateLogs, setDoGenerateLogs] = useState<boolean>(true);
+  const [initialPartitions, setInitialPartitions] = useState<IPartition[]>([]);
+  const [initialPrograms, setInitialPrograms] = useState<IProgram[]>([]);
 
   const [isSimulationRunning, setIsSimulationRunning] = useState(false);
-  const hasPartitionsAndProcesses =
-    partitions.length > 0 && processes.length > 0;
+  const hasPartitionsAndPrograms = partitions.length > 0 && programs.length > 0;
 
   const addPartition = (size: number) => {
     const newPartition: IPartition = {
@@ -48,33 +49,33 @@ export default function StaticAllocationView() {
     setPartitions(newPartitions);
   };
 
-  const addProcess = (size: number) => {
-    const newPartition: IProcess = {
-      id: processes.length + 1,
+  const addProgram = (size: number) => {
+    const newPartition: IProgram = {
+      id: programs.length + 1,
       size,
       allocatedIn: null,
     };
-    setProcesses([...processes, newPartition]);
+    setPrograms([...programs, newPartition]);
   };
 
-  const removeProcess = (id: number) => {
-    const processToRemove = processes.find((p) => p.id === id);
-    if (processToRemove?.allocatedIn) {
-      const partitionAllocated = processToRemove.allocatedIn;
+  const removeProgram = (id: number) => {
+    const programToRemove = programs.find((p) => p.id === id);
+    if (programToRemove?.allocatedIn) {
+      const partitionAllocated = programToRemove.allocatedIn;
       addSimulationLog(
-        `Killed process ${id} which was allocated in partition ${partitionAllocated.id}, freeing ${partitionAllocated.used}kb.`
+        `Killed program ${id} which was allocated in partition ${partitionAllocated.id}, freeing ${partitionAllocated.used}kb.`
       );
       partitions.find((p) => p.id === partitionAllocated.id)!.used = 0;
-      const processesToUnlock = processes.filter(
-        (process) => process.size <= partitionAllocated.size
+      const programsToUnlock = programs.filter(
+        (program) => program.size <= partitionAllocated.size
       );
-      for (const process of processesToUnlock) {
-        process.isLocked = false;
+      for (const program of programsToUnlock) {
+        program.isLocked = false;
       }
     }
 
-    const newProcesses = processes.filter((p) => p.id !== id);
-    setProcesses(newProcesses);
+    const newPrograms = programs.filter((p) => p.id !== id);
+    setPrograms(newPrograms);
   };
 
   const addSimulationLog = (text: string) => {
@@ -91,16 +92,16 @@ export default function StaticAllocationView() {
   };
 
   const downloadSimulationLog = () => {
-    const partitionsData = partitions.reduce((acc, partition) => {
+    const partitionsData = initialPartitions.reduce((acc, partition) => {
       return `${acc}Partition ${partition.id} - ${partition.size}kb\n`;
     }, "");
-    const processesData = processes.reduce((acc, process) => {
-      return `${acc}Process ${process.id} - ${process.size}kb\n`;
+    const programsData = initialPrograms.reduce((acc, program) => {
+      return `${acc}Program ${program.id} - ${program.size}kb\n`;
     }, "");
     const simulationLog = simulations.reduce((acc, simulation) => {
       return `${acc}${simulation.date.toUTCString()} - ${simulation.text}\n`;
     }, "");
-    const simulationData = `Strategy: ${strategy}\nPartitions:\n${partitionsData}\nProcesses:\n${processesData}\nSimulation Log:\n${simulationLog}`;
+    const simulationData = `Allocation method: Static Partitioned Relocatable Allocation\nStrategy: ${strategy}\n\nPartitions:\n${partitionsData}\nPrograms:\n${programsData}\nSimulation Log:\n${simulationLog}`;
 
     const element = document.createElement("a");
     const file = new Blob([simulationData], {
@@ -120,15 +121,17 @@ export default function StaticAllocationView() {
         prevPartitions.map((partition) => ({ ...partition, used: 0 }))
       );
 
-      setProcesses((prevProcesses) =>
-        prevProcesses.map((process) => ({
-          ...process,
+      setPrograms((previousPrograms) =>
+        previousPrograms.map((program) => ({
+          ...program,
           allocatedIn: null,
           isLocked: false,
         }))
       );
     } else {
       setIsSimulationRunning(true);
+      setInitialPartitions([...partitions]);
+      setInitialPrograms([...programs]);
       setSimulations([]);
     }
   };
@@ -157,29 +160,29 @@ export default function StaticAllocationView() {
     return ((used / size) * 100).toFixed(2);
   };
 
-  const allocateProcesses = () => {
-    const processesToAllocate = processes.filter(
-      (process) => process.allocatedIn === null && !process.isLocked
+  const allocatePrograms = () => {
+    const programsToAllocate = programs.filter(
+      (program) => program.allocatedIn === null && !program.isLocked
     );
 
-    if (processesToAllocate.length === 0) {
-      addSimulationLog("No other processes can be allocated.");
-      console.log("No processes to allocate");
+    if (programsToAllocate.length === 0) {
+      addSimulationLog("No other programs can be allocated.");
+      console.log("No programs to allocate");
       return;
     }
 
-    for (const process of processesToAllocate) {
-      console.log("Allocating process", process.id);
+    for (const program of programsToAllocate) {
+      console.log("Allocating program", program.id);
 
       let availablePartition: IPartition | undefined;
       if (strategy === "first-fit") {
         availablePartition = partitions.find(
-          (partition) => !partition.used && partition.size >= process.size
+          (partition) => !partition.used && partition.size >= program.size
         );
       } else {
         const sortedPartitions = partitions
           .filter(
-            (partition) => !partition.used && partition.size >= process.size
+            (partition) => !partition.used && partition.size >= program.size
           )
           .sort((a, b) => a.size - b.size);
 
@@ -190,31 +193,31 @@ export default function StaticAllocationView() {
         console.log(
           "Found available partition",
           availablePartition.id,
-          "for process",
-          process.id
+          "for program",
+          program.id
         );
-        process.allocatedIn = availablePartition;
+        program.allocatedIn = availablePartition;
 
-        availablePartition.used = process.size;
+        availablePartition.used = program.size;
         addSimulationLog(
-          `Process ${process.id} allocated in partition ${
+          `Program ${program.id} allocated in partition ${
             availablePartition.id
-          }, occupying ${process.size} of ${
+          }, occupying ${program.size} of ${
             availablePartition.size
           }kb (${getPartitionOccupationPercentage(
-            process.size,
+            program.size,
             availablePartition.size
           )}%)`
         );
       } else {
         addSimulationLog(
-          `No available partitions for process ${process.id} (with size ${
-            process.size
+          `No available partitions for program ${program.id} (with size ${
+            program.size
           }kb). Fragmentation is ${getPartitionFragmentationsInKbytes()}kb, representing ${getPartitionFragmentationsInPercentage()}% of total space.`
         );
-        process.isLocked = true;
+        program.isLocked = true;
 
-        console.log("No available partitions for process", process.id);
+        console.log("No available partitions for program", program.id);
       }
     }
   };
@@ -222,13 +225,13 @@ export default function StaticAllocationView() {
   useEffect(() => {
     if (isSimulationRunning) {
       const intervalId = setInterval(() => {
-        allocateProcesses();
-        setProcesses([...processes]);
+        allocatePrograms();
+        setPrograms([...programs]);
       }, 2000);
 
       return () => clearInterval(intervalId);
     }
-  }, [isSimulationRunning, processes, partitions]);
+  }, [isSimulationRunning, programs, partitions]);
 
   return (
     <div
@@ -262,14 +265,14 @@ export default function StaticAllocationView() {
         </div>
         <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
           {!isSimulationRunning && (
-            <ProcessController
-              onAddProcess={addProcess}
-              onClearProcesses={() => setProcesses([])}
+            <ProgramsController
+              onAddProgram={addProgram}
+              onClearPrograms={() => setPrograms([])}
             />
           )}
-          <ProcessesList
-            processes={processes}
-            onProcessRemoved={removeProcess}
+          <ProgramsList
+            programs={programs}
+            onProgramRemoved={removeProgram}
             isSimulationRunning={isSimulationRunning}
           />
         </div>
@@ -285,7 +288,7 @@ export default function StaticAllocationView() {
           style={{
             backgroundColor: isSimulationRunning
               ? "#e74c3c"
-              : hasPartitionsAndProcesses
+              : hasPartitionsAndPrograms
               ? "#2ecc71"
               : "#7f8c8d",
             color: "white",
@@ -296,7 +299,7 @@ export default function StaticAllocationView() {
             border: "none",
             width: "200px",
           }}
-          disabled={!isSimulationRunning && !hasPartitionsAndProcesses}
+          disabled={!isSimulationRunning && !hasPartitionsAndPrograms}
           onClick={toggleSimulation}
         >
           {isSimulationRunning ? "Stop Simulation" : "Start Simulation"}
@@ -322,8 +325,8 @@ export default function StaticAllocationView() {
           </div>
         </div>
       </div>
-      {!hasPartitionsAndProcesses && (
-        <div>Add partitions and processes to start the simulation</div>
+      {!hasPartitionsAndPrograms && (
+        <div>Add partitions and programs to start the simulation</div>
       )}
       <div
         style={{
