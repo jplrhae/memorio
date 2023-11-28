@@ -2,16 +2,18 @@ export default function Header() {
   return (
     <div
       style={{
-        backgroundColor: "black",
+        backgroundColor: "#1f618d",
         color: "white",
-        padding: 15,
+        padding: "15px",
         display: "flex",
         justifyContent: "center",
-        fontSize: 30,
+        alignItems: "center",
+        fontSize: "30px",
         fontWeight: "bold",
+        boxShadow: "0 5px 5px rgba(0, 0, 0, 0.1)",
       }}
     >
-      Memorio
+      Memorio, a Memory Management Simulator
     </div>
   );
 }

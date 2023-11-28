@@ -1,28 +1,25 @@
 import React, { useState, ChangeEvent, FormEvent } from "react";
 
-interface PartitionFormProps {
-  onAddPartition: (size: number) => void;
-  onClearPartitions: () => void;
+interface IProcessesFormProps {
+  onAddProcess: (size: number) => void;
+  onClearProcesses: () => void;
 }
 
-const PartitionForm: React.FC<PartitionFormProps> = ({
-  onAddPartition,
-  onClearPartitions,
-}) => {
-  const [partitionSize, setPartitionSize] = useState<number>(0);
+export default function ProcessController(props: IProcessesFormProps) {
+  const [processSize, setProcessSize] = useState<number>(0);
 
   const handleSizeChange = (event: ChangeEvent<HTMLInputElement>) => {
     const newSize = parseFloat(event.target.value);
-    setPartitionSize(newSize);
+    setProcessSize(newSize);
   };
 
   const handleSubmit = (event: FormEvent) => {
     event.preventDefault();
-    if (partitionSize > 0) {
-      onAddPartition(partitionSize);
-      setPartitionSize(0);
+    if (processSize > 0) {
+      props.onAddProcess(processSize);
+      setProcessSize(0);
     } else {
-      onAddPartition(Math.floor(Math.random() * 10) + 1);
+      props.onAddProcess(Math.floor(Math.random() * 10) + 1);
     }
   };
 
@@ -41,10 +38,10 @@ const PartitionForm: React.FC<PartitionFormProps> = ({
         onSubmit={handleSubmit}
       >
         <label style={{ color: "white" }}>
-          Partition Size (KB):
+          Process Size (KB):
           <input
             type="number"
-            value={partitionSize}
+            value={processSize}
             onChange={handleSizeChange}
             style={{
               padding: "8px",
@@ -55,18 +52,18 @@ const PartitionForm: React.FC<PartitionFormProps> = ({
         </label>
         <button
           type="submit"
-          disabled={partitionSize <= 0}
+          disabled={processSize <= 0}
           style={{
-            backgroundColor: partitionSize <= 0 ? "#7f8c8d" : "#3498db", // Button color
-            color: partitionSize <= 0 ? "black" : "white",
+            backgroundColor: processSize <= 0 ? "#7f8c8d" : "#3498db", // Button color
+            color: processSize <= 0 ? "black" : "white",
             padding: "10px",
             borderRadius: "5px",
-            cursor: partitionSize > 0 ? "pointer" : "not-allowed",
+            cursor: processSize > 0 ? "pointer" : "not-allowed",
             outline: "none",
             border: "none",
           }}
         >
-          Add Partition
+          Add Process
         </button>
         <button
           type="submit"
@@ -80,11 +77,11 @@ const PartitionForm: React.FC<PartitionFormProps> = ({
             border: "none",
           }}
         >
-          Add Random Partition
+          Add Random Process
         </button>
       </form>
       <button
-        onClick={() => onClearPartitions()}
+        onClick={() => props.onClearProcesses()}
         style={{
           backgroundColor: "#e74c3c", // Red color for clear button
           color: "white",
@@ -95,10 +92,8 @@ const PartitionForm: React.FC<PartitionFormProps> = ({
           border: "none",
         }}
       >
-        Clear All Partitions
+        Clear All Processes
       </button>
     </>
   );
-};
-
-export default PartitionForm;
+}

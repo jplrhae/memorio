@@ -1,11 +1,11 @@
-import { IPartition } from "./PartitionsView";
+import { IProcess } from "./ProcessesView";
 
-interface IPartitionsListProps {
-  partitions: IPartition[];
-  onPartitionRemoved: (id: number) => void;
+interface IProcessesListProps {
+  processes: IProcess[];
+  onProcessRemoved: (id: number) => void;
 }
 
-export default function PartitionsList(props: IPartitionsListProps) {
+export default function ProcessesList(props: IProcessesListProps) {
   return (
     <div
       style={{
@@ -18,19 +18,19 @@ export default function PartitionsList(props: IPartitionsListProps) {
         overflow: "hidden", // Hide overflowing content
       }}
     >
-      {props.partitions.length === 0 ? (
+      {props.processes.length === 0 ? (
         <div
           style={{
             padding: "20px",
             borderBottom: "1px solid #34495e", // Border to separate when no partitions are added
           }}
         >
-          No partitions added.
+          No processes added.
         </div>
       ) : (
-        props.partitions.map((partition) => (
+        props.processes.map((process) => (
           <div
-            key={partition.id}
+            key={process.id}
             style={{
               border: "1px dotted #34495e", // Dotted border
               display: "flex",
@@ -39,12 +39,10 @@ export default function PartitionsList(props: IPartitionsListProps) {
               padding: "10px",
             }}
           >
-            <div>{partition.used}kb</div>
-            <div>/</div>
-            <div>{partition.size}kb</div>
+            <div>{process.size}kb</div>
             <div>
               <button
-                onClick={() => props.onPartitionRemoved(partition.id)}
+                onClick={() => props.onProcessRemoved(process.id)}
                 style={{
                   backgroundColor: "#e74c3c", // Red color for remove button
                   color: "white",

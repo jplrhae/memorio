@@ -1,5 +1,5 @@
 import PartitionsView from "./partitions/PartitionsView";
-import ProcessesView from "./ProcessesView";
+import ProcessesView from "./processes/ProcessesView";
 
 export default function StaticAllocationView() {
   return (
